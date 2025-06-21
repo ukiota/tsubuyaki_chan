@@ -106,11 +106,20 @@ async def main_task():
 
 
 # --- プログラムの実行部分 ---
+# --- プログラムの実行部分 ---
+# ↓↓↓↓ このブロックをまるごと置き換えてください ↓↓↓↓
 if __name__ == "__main__":
+    print("--- SCRIPT CHECKPOINT 1: プログラム実行開始 ---")
+
     if not TOKEN or LEARNING_CHANNEL_ID == 0 or POSTING_CHANNEL_ID == 0:
+        print("--- SCRIPT CHECKPOINT 2: 失敗（Secretsがありません） ---")
         print("エラー: 必要な情報（TOKEN, チャンネルID）が設定されていません。")
     else:
+        print("--- SCRIPT CHECKPOINT 3: Secretsの読み込み成功 ---")
         # メイン処理を実行
         asyncio.run(main_task())
         # 実行後にモデルの変更をGitHubに保存
         commit_and_push_model()
+        print("--- SCRIPT CHECKPOINT 4: 全ての処理が完了 ---")
+
+# ↑↑↑↑ このブロックをまるごと置き換えてください ↑↑↑↑
