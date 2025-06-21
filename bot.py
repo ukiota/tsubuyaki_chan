@@ -108,6 +108,8 @@ async def main_task():
 # --- プログラムの実行部分 ---
 # --- プログラムの実行部分 ---
 # ↓↓↓↓ このブロックをまるごと置き換えてください ↓↓↓↓
+# --- プログラムの実行部分 ---
+# ↓↓↓↓ このブロックをまるごと置き換えてください ↓↓↓↓
 if __name__ == "__main__":
     print("--- SCRIPT CHECKPOINT 1: プログラム実行開始 ---")
 
@@ -116,10 +118,20 @@ if __name__ == "__main__":
         print("エラー: 必要な情報（TOKEN, チャンネルID）が設定されていません。")
     else:
         print("--- SCRIPT CHECKPOINT 3: Secretsの読み込み成功 ---")
-        # メイン処理を実行
-        asyncio.run(main_task())
-        # 実行後にモデルの変更をGitHubに保存
+        try:
+            # 5分(300秒)以内に処理が終わらなければタイムアウトエラーを発生させる
+            awaitable = main_task()
+            asyncio.run(asyncio.wait_for(awaitable, timeout=300.0))
+
+        except asyncio.TimeoutError:
+            print("--- SCRIPT CHECKPOINT 5: タイムアウトエラー！ ---")
+            print("エラー: 処理が5分以内に完了しませんでした。Discordへの接続で停止している可能性が極めて高いです。")
+        except Exception as e:
+            print(f"--- SCRIPT CHECKPOINT 6: 予期せぬエラー！ ---")
+            print(f"エラー内容: {e}")
+        
+        # タイムアウト等で失敗しても、とりあえずコミット処理は試みる
         commit_and_push_model()
-        print("--- SCRIPT CHECKPOINT 4: 全ての処理が完了 ---")
+        print("--- SCRIPT CHECKPOINT 4: プログラムの実行フローが終了 ---")
 
 # ↑↑↑↑ このブロックをまるごと置き換えてください ↑↑↑↑
