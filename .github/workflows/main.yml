@@ -1,0 +1,59 @@
+# ワークフロー（一連の自動作業）の名前
+name: Run Daily Discord Bot
+
+# このワークフローをいつ実行するかの設定
+on:
+  schedule:
+    # cron形式でスケジュールを指定
+    # '0 15 * * *' は、世界標準時(UTC)で毎日15:00を意味します。
+    # これは日本時間(JST)の午前0:00にあたります。
+    - cron: '0 15 * * *'
+    
+  # Actionsタブから手動で実行できるようにするための設定
+  workflow_dispatch:
+
+# 実行する具体的な「仕事（ジョブ）」の内容
+jobs:
+  run-bot:
+    # ubuntu-latest という最新のLinux環境で実行する
+    runs-on: ubuntu-latest
+    
+    # 仕事のステップ（手順）
+    steps:
+      # 1. GitHubリポジトリからコードをダウンロードしてくる
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Pythonの環境を準備する
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 3. 必要なPythonライブラリをインストールする
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install discord.py janome
+
+      # 4. BotのPythonスクリプトを実行する
+      - name: Run bot script
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          LEARNING_CHANNEL_ID: ${{ secrets.LEARNING_CHANNEL_ID }}
+          POSTING_CHANNEL_ID: ${{ secrets.POSTING_CHANNEL_ID }}
+        run: python bot.py
+
+      # 5. 更新されたモデルファイルをリポジトリに保存し直す
+      - name: Commit and push model file
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add markov_model.json
+          # 変更があった場合のみコミットとプッシュを行う
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "Update markov model"
+            git push
+          else
+            echo "No changes to commit."
+          fi
