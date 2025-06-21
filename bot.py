@@ -77,7 +77,7 @@ async def main_task():
         
         # 1. 学習
         print(f"「{learning_channel.name}」で学習を開始します。")
-        async for msg in learning_channel.history(limit=3000):
+        async for msg in learning_channel.history(limit=500):
             if msg.author.bot or msg.content.startswith(('!', '@')): continue
             words = list(t.tokenize(msg.content, wakati=True))
             if not words: continue
